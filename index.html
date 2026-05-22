@@ -32,21 +32,13 @@
 
     h1 { font-size: 2rem; font-weight: 900; margin-bottom: 8px; }
     .subtitulo { color: #8888bb; font-size: 0.95rem; line-height: 1.5; margin-bottom: 4px; }
-    .emoji-big { font-size: 3rem; margin-bottom: 12px; }
 
     /* ── BOTONES ───────────────────────────── */
     .btn {
       background: linear-gradient(135deg, #6a3fff, #a040ff);
-      color: #fff;
-      border: none;
-      border-radius: 14px;
-      padding: 14px 32px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      width: 100%;
-      max-width: 300px;
-      margin-top: 12px;
+      color: #fff; border: none; border-radius: 14px;
+      padding: 14px 32px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; width: 100%; max-width: 300px; margin-top: 12px;
       transition: transform 0.1s;
       box-shadow: 0 4px 20px rgba(106,63,255,0.35);
     }
@@ -54,36 +46,40 @@
     .btn.outline {
       background: rgba(255,255,255,0.07);
       border: 1px solid rgba(255,255,255,0.15);
-      box-shadow: none;
-      font-size: 0.9rem;
+      box-shadow: none; font-size: 0.9rem;
     }
 
     /* ── TARJETAS DE MODO ──────────────────── */
-    .mode-cards { display: flex; gap: 12px; margin-top: 20px; width: 100%; }
+    .mode-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 18px;
+      width: 100%;
+    }
     .mode-card {
-      flex: 1;
       border: 2px solid rgba(255,255,255,0.1);
       border-radius: 16px;
-      padding: 16px 10px;
+      padding: 14px 10px;
       cursor: pointer;
       transition: all 0.2s;
       background: rgba(255,255,255,0.03);
       user-select: none;
     }
-    .mode-card.sel-normal  { border-color: #6a3fff; background: rgba(106,63,255,0.15); }
+    #card-entrena { grid-column: 1 / -1; display: flex; align-items: center; gap: 14px; text-align: left; padding: 14px 18px; }
+    #card-entrena .mode-icon { font-size: 1.8rem; flex-shrink: 0; }
+    #card-entrena .mode-desc { margin-top: 2px; }
+    .mode-card.sel-normal    { border-color: #6a3fff; background: rgba(106,63,255,0.15); }
     .mode-card.sel-imposible { border-color: #ef4444; background: rgba(239,68,68,0.12); }
+    .mode-card.sel-entrena   { border-color: #4ade80; background: rgba(74,222,128,0.1); }
     .mode-icon { font-size: 2rem; margin-bottom: 6px; }
-    .mode-name { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .mode-name { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
     .mode-desc { font-size: 0.72rem; color: #8888bb; }
 
     /* ── CABECERA DEL JUEGO ────────────────── */
     .game-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-      max-width: 400px;
-      margin-bottom: 8px;
+      display: flex; justify-content: space-between; align-items: center;
+      width: 100%; max-width: 400px; margin-bottom: 8px;
     }
     .score-box { text-align: center; min-width: 60px; }
     .score-num { font-size: 1.6rem; font-weight: 900; line-height: 1; }
@@ -91,102 +87,148 @@
     .score-num.human { color: #fbbf24; }
     .score-num.ai    { color: #ef4444; }
     .score-num.draw  { color: #666; }
-
     .mode-badge {
-      background: rgba(255,255,255,0.07);
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-size: 0.75rem;
-      color: #b89dff;
+      background: rgba(255,255,255,0.07); border-radius: 20px;
+      padding: 4px 12px; font-size: 0.75rem; color: #b89dff;
     }
     .mode-badge.imposible { color: #f87171; }
+    .mode-badge.entrena   { color: #4ade80; }
+
+    /* ── RESET MARCADOR ────────────────────── */
+    #btn-reset-score {
+      background: none; border: none; cursor: pointer;
+      color: #444; font-size: 0.85rem; margin-top: 4px;
+      padding: 2px 4px; border-radius: 6px;
+      transition: color 0.15s;
+      display: block; margin-left: auto; margin-right: auto;
+    }
+    #btn-reset-score:hover { color: #f87171; }
 
     /* ── STATUS ────────────────────────────── */
     .status {
-      font-size: 0.9rem;
-      color: #b89dff;
-      margin: 6px 0 10px;
-      min-height: 1.5em;
-      transition: color 0.3s;
+      font-size: 0.9rem; color: #b89dff;
+      margin: 6px 0 8px; min-height: 1.5em; transition: color 0.3s;
     }
-    .status.ai-turn { color: #f87171; }
-    .status.human-win { color: #4ade80; }
-    .status.ai-win { color: #f87171; }
+    .status.ai-turn    { color: #f87171; }
+    .status.human-win  { color: #4ade80; }
+    .status.ai-win     { color: #f87171; }
 
     /* ── TABLERO ───────────────────────────── */
     .board-wrap {
-      background: #1a1754;
-      border-radius: 18px;
-      padding: 10px;
-      width: 100%;
-      max-width: 400px;
+      background: #1a1754; border-radius: 18px; padding: 10px;
+      width: 100%; max-width: 400px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      position: relative;
     }
     .board { display: flex; gap: 5px; }
     .col {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      cursor: pointer;
-      border-radius: 8px;
-      padding: 3px;
-      transition: background 0.15s;
-      position: relative;
+      flex: 1; display: flex; flex-direction: column; gap: 5px;
+      cursor: pointer; border-radius: 8px; padding: 3px;
+      transition: background 0.15s; position: relative;
     }
     .col:hover:not(.disabled) { background: rgba(255,255,255,0.07); }
     .col.disabled { cursor: default; }
 
-    /* ── INDICADOR DE COLUMNA ──────────────── */
+    /* ── INDICADOR HOVER ───────────────────── */
     .col::before {
       content: '▼';
-      position: absolute;
-      top: -18px;
-      left: 50%;
+      position: absolute; top: -20px; left: 50%;
       transform: translateX(-50%);
-      font-size: 10px;
-      color: #fbbf24;
-      opacity: 0;
-      transition: opacity 0.15s;
+      font-size: 10px; color: #fbbf24; opacity: 0; transition: opacity 0.15s;
     }
     .col:hover:not(.disabled)::before { opacity: 1; }
 
+    /* ── PISTA (modo entrenamiento) ────────── */
+    .col.pista { background: rgba(74,222,128,0.12) !important; }
+    .col.pista::before {
+      content: '💡';
+      opacity: 1 !important;
+      font-size: 13px;
+      animation: pista-pulso 0.8s ease-in-out infinite alternate;
+    }
+    @keyframes pista-pulso { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(-4px); } }
+
+    /* ── BOTONES ENTRENAMIENTO ─────────────── */
+    .train-btns {
+      display: none;
+      gap: 8px;
+      margin-top: 10px;
+      width: 100%; max-width: 300px;
+    }
+    .train-btns.visible { display: flex; }
+    .train-btn {
+      flex: 1;
+      border-radius: 12px;
+      padding: 9px 10px;
+      font-size: 0.85rem; font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      border: 1px solid rgba(74,222,128,0.35);
+      background: rgba(74,222,128,0.12);
+      color: #4ade80;
+    }
+    .train-btn:hover  { background: rgba(74,222,128,0.22); }
+    .train-btn:active { transform: scale(0.96); }
+    .train-btn:disabled { opacity: 0.35; cursor: default; }
+    /* Estado "pistas OFF" */
+    #btn-pista.off {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.15);
+      color: #666;
+    }
+
     /* ── CELDAS ────────────────────────────── */
     .cell {
-      width: 100%;
-      aspect-ratio: 1;
-      border-radius: 50%;
-      background: rgba(0,0,0,0.4);
+      width: 100%; aspect-ratio: 1;
+      border-radius: 50%; background: rgba(0,0,0,0.4);
     }
-    .cell.human {
-      background: #fbbf24;
-      box-shadow: 0 0 10px rgba(251,191,36,0.5);
-    }
-    .cell.ai {
-      background: #ef4444;
-      box-shadow: 0 0 10px rgba(239,68,68,0.5);
-    }
+    .cell.human { background: #fbbf24; box-shadow: 0 0 10px rgba(251,191,36,0.5); }
+    .cell.ai    { background: #ef4444; box-shadow: 0 0 10px rgba(239,68,68,0.5); }
     @keyframes caer {
       from { transform: translateY(-300%) scaleY(0.6); opacity: 0.7; }
       to   { transform: none; opacity: 1; }
     }
     .cell.nueva { animation: caer 0.18s cubic-bezier(.4,1.4,.6,1) both; }
-
-    @keyframes ganar {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.18); }
-    }
+    @keyframes ganar { 0%,100% { transform: scale(1); } 50% { transform: scale(1.18); } }
     .cell.ganadora { animation: ganar 0.55s ease-in-out infinite; }
     .cell.human.ganadora { box-shadow: 0 0 22px rgba(251,191,36,0.9); }
     .cell.ai.ganadora    { box-shadow: 0 0 22px rgba(239,68,68,0.9); }
 
+    /* ── ANÁLISIS POST-PARTIDA ─────────────── */
+    .analysis-box {
+      display: none;
+      width: 100%; max-width: 400px;
+      background: rgba(10,10,30,0.8);
+      border: 1px solid rgba(106,63,255,0.4);
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-top: 12px;
+      text-align: left;
+      animation: fadeIn 0.5s ease;
+    }
+    .analysis-box.visible { display: block; }
+    .analysis-title {
+      font-size: 0.78rem; font-weight: 700; color: #b89dff;
+      margin-bottom: 10px; letter-spacing: 0.5px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .analysis-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 0.82rem; color: #ccc; line-height: 1.4;
+      margin-bottom: 8px;
+    }
+    .analysis-item:last-child { margin-bottom: 0; }
+    .analysis-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #6a3fff; flex-shrink: 0; margin-top: 5px;
+    }
+    .analysis-dot.green { background: #4ade80; }
+    .analysis-dot.red   { background: #f87171; }
+
     /* ── LEYENDA ───────────────────────────── */
     .legend {
-      display: flex;
-      gap: 20px;
-      margin-top: 10px;
-      font-size: 0.78rem;
-      color: #8888bb;
+      display: flex; gap: 20px; margin-top: 10px;
+      font-size: 0.78rem; color: #8888bb;
     }
     .legend span { display: flex; align-items: center; gap: 5px; }
     .dot { width: 11px; height: 11px; border-radius: 50%; }
@@ -197,25 +239,40 @@
     .ia-nota {
       background: rgba(106,63,255,0.12);
       border: 1px solid rgba(106,63,255,0.3);
-      border-radius: 12px;
-      padding: 12px 16px;
-      margin: 14px 0 4px;
-      font-size: 0.82rem;
-      color: #b89dff;
-      line-height: 1.5;
-      text-align: left;
-      width: 100%;
-      max-width: 340px;
+      border-radius: 12px; padding: 12px 16px;
+      margin: 14px 0 4px; font-size: 0.82rem;
+      color: #b89dff; line-height: 1.5; text-align: left;
+      width: 100%; max-width: 340px;
+    }
+
+    /* ── CONFETTI ──────────────────────────── */
+    #confetti-wrap {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; overflow: hidden; z-index: 999;
+    }
+    .conf {
+      position: absolute; top: -10px;
+      border-radius: 2px;
+      animation: conf-caer linear forwards;
+    }
+    @keyframes conf-caer {
+      0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateY(105vh) rotate(720deg) scale(0.5); opacity: 0; }
     }
   </style>
 </head>
 <body>
 
+  <!-- ░░ CONFETTI (global) ░░ -->
+  <div id="confetti-wrap"></div>
+
   <!-- ░░ INICIO ░░ -->
   <div class="screen active" id="s-inicio">
-    <div class="emoji-big">🤖</div>
+    <div style="font-size:3rem;margin-bottom:12px">🤖</div>
     <h1>4 en Raya</h1>
-    <p class="subtitulo">Juega contra una IA con algoritmo <strong>minimax</strong>.<br>Elige tu dificultad:</p>
+    <p class="subtitulo">Juega contra una IA con algoritmo <strong>minimax</strong>.<br>Elige tu modo:</p>
 
     <div class="mode-cards">
       <div class="mode-card sel-normal" id="card-normal" onclick="elegirModo('normal')">
@@ -227,6 +284,13 @@
         <div class="mode-icon">💀</div>
         <div class="mode-name">Imposible</div>
         <div class="mode-desc">La IA no comete errores</div>
+      </div>
+      <div class="mode-card" id="card-entrena" onclick="elegirModo('entrena')">
+        <div class="mode-icon">🎓</div>
+        <div>
+          <div class="mode-name">Entrenamiento</div>
+          <div class="mode-desc">La IA te da una pista antes de cada jugada y analiza cómo juegas al terminar</div>
+        </div>
       </div>
     </div>
 
@@ -244,6 +308,7 @@
         <span class="mode-badge" id="modo-badge">Normal</span>
         <div class="score-num draw" id="pts-draw" style="margin-top:4px">0</div>
         <div class="score-lbl">EMPATES</div>
+        <button id="btn-reset-score" onclick="resetearMarcador()" title="Reiniciar marcador">↺</button>
       </div>
       <div class="score-box">
         <div class="score-num ai" id="pts-ai">0</div>
@@ -253,8 +318,14 @@
 
     <div class="status" id="status">Tu turno</div>
 
-    <div class="board-wrap" style="margin-top:8px">
+    <div class="board-wrap" style="margin-top:4px">
       <div class="board" id="tablero"></div>
+    </div>
+
+    <!-- Análisis post-partida -->
+    <div class="analysis-box" id="analysis-box">
+      <div class="analysis-title">🧠 Análisis de la IA sobre tu juego</div>
+      <div id="analysis-items"></div>
     </div>
 
     <div class="legend">
@@ -262,11 +333,16 @@
       <span><div class="dot ai"></div> IA (rojo)</span>
     </div>
 
+    <div class="train-btns" id="train-btns">
+      <button class="train-btn" id="btn-undo"   onclick="deshacerJugada()">↩ Deshacer</button>
+      <button class="train-btn" id="btn-pista"  onclick="togglePistas()">💡 Pistas: ON</button>
+    </div>
+
     <button class="btn" onclick="nuevaRonda()" style="margin-top:14px">Nueva partida</button>
     <button class="btn outline" onclick="pantalla('s-inicio')">Cambiar modo</button>
 
     <div class="ia-nota">
-      🧠 Esta IA usa el algoritmo <strong>minimax con poda alfa-beta</strong> —
+      🧠 Esta IA usa <strong>minimax con poda alfa-beta</strong> —
       el mismo principio que usa el ajedrez por ordenador.
       En modo imposible evalúa miles de jugadas por movimiento.
     </div>
@@ -285,6 +361,44 @@
   let tablero, finJuego, iaActiva, turnoHumano, modo;
   let marcador = { humano: 0, ia: 0, empate: 0 };
   let modoElegido = 'normal';
+  let historial = [];     // snapshots para undo (modo entrenamiento)
+  let pistasActivas = true; // toggle de pistas en modo entrenamiento
+
+  // ─────────────────────────────────────────────────────
+  // PERSISTENCIA DEL MARCADOR
+  // ─────────────────────────────────────────────────────
+  function claveStorage(m) { return `4enraya_marcador_${m}`; }
+
+  function cargarMarcador(m) {
+    try {
+      const raw = localStorage.getItem(claveStorage(m));
+      if (raw) return JSON.parse(raw);
+    } catch(e) {}
+    return { humano: 0, ia: 0, empate: 0 };
+  }
+
+  function guardarMarcador() {
+    try { localStorage.setItem(claveStorage(modo), JSON.stringify(marcador)); } catch(e) {}
+  }
+
+  function resetearMarcador() {
+    marcador = { humano: 0, ia: 0, empate: 0 };
+    guardarMarcador();
+    actualizarMarcador();
+  }
+
+  // Stats para el análisis
+  let stats = {};
+  function resetStats() {
+    stats = {
+      movimientos: [],       // columnas jugadas
+      bloqueosPercidos: 0,   // amenazas IA ignoradas
+      forksCreados: 0,       // dobles amenazas creadas
+      centro: 0,             // jugadas en cols 2-4
+      extremos: 0,           // jugadas en cols 0-1 y 5-6
+      amenazaIAAntes: -1,    // columna ganadora de IA en el turno anterior
+    };
+  }
 
   // ─────────────────────────────────────────────────────
   // PANTALLAS
@@ -299,17 +413,24 @@
   // ─────────────────────────────────────────────────────
   function elegirModo(m) {
     modoElegido = m;
-    document.getElementById('card-normal').className    = 'mode-card' + (m==='normal' ? ' sel-normal' : '');
+    document.getElementById('card-normal').className    = 'mode-card' + (m==='normal'    ? ' sel-normal'    : '');
     document.getElementById('card-imposible').className = 'mode-card' + (m==='imposible' ? ' sel-imposible' : '');
+    document.getElementById('card-entrena').className   = 'mode-card' + (m==='entrena'   ? ' sel-entrena'   : '');
   }
 
   function iniciarJuego() {
     modo = modoElegido;
-    marcador = { humano: 0, ia: 0, empate: 0 };
+    marcador = cargarMarcador(modo);
     actualizarMarcador();
     const badge = document.getElementById('modo-badge');
-    badge.textContent = modo === 'imposible' ? '💀 Imposible' : '🙂 Normal';
-    badge.className = 'mode-badge' + (modo === 'imposible' ? ' imposible' : '');
+    if (modo === 'imposible') { badge.textContent = '💀 Imposible'; badge.className = 'mode-badge imposible'; }
+    else if (modo === 'entrena') { badge.textContent = '🎓 Entrenamiento'; badge.className = 'mode-badge entrena'; }
+    else { badge.textContent = '🙂 Normal'; badge.className = 'mode-badge'; }
+    // Mostrar controles de entrenamiento solo en ese modo
+    const trainBtns = document.getElementById('train-btns');
+    trainBtns.classList.toggle('visible', modo === 'entrena');
+    pistasActivas = true;
+    actualizarBtnPista();
     pantalla('s-juego');
     nuevaRonda();
   }
@@ -318,46 +439,194 @@
   // RONDA
   // ─────────────────────────────────────────────────────
   function nuevaRonda() {
-    tablero  = Array(FILAS).fill(null).map(() => Array(COLS).fill(0));
-    finJuego = false;
-    iaActiva = false;
+    tablero     = Array(FILAS).fill(null).map(() => Array(COLS).fill(0));
+    finJuego    = false;
+    iaActiva    = false;
     turnoHumano = true;
+    historial   = [];
+    resetStats();
+    ocultarAnalisis();
     construirTablero();
     setStatus('🟡 Tu turno — toca una columna', '');
     habilitarCols(true);
+    actualizarBtnUndo();
+    if (modo === 'entrena') setTimeout(mostrarPista, 100);
+  }
+
+  // ─────────────────────────────────────────────────────
+  // PISTA (modo entrenamiento)
+  // ─────────────────────────────────────────────────────
+  function mostrarPista() {
+    quitarPista();
+    if (modo !== 'entrena' || finJuego || !turnoHumano || !pistasActivas) return;
+    const col = mejorColumnaParaHumano();
+    const el = document.getElementById(`col-${col}`);
+    if (el) el.classList.add('pista');
+  }
+
+  function togglePistas() {
+    pistasActivas = !pistasActivas;
+    actualizarBtnPista();
+    if (pistasActivas) {
+      setTimeout(mostrarPista, 50);
+    } else {
+      quitarPista();
+    }
+  }
+
+  function actualizarBtnPista() {
+    const btn = document.getElementById('btn-pista');
+    if (!btn) return;
+    if (pistasActivas) {
+      btn.textContent = '💡 Pistas: ON';
+      btn.classList.remove('off');
+    } else {
+      btn.textContent = '💡 Pistas: OFF';
+      btn.classList.add('off');
+    }
+  }
+
+  function quitarPista() {
+    for (let c = 0; c < COLS; c++) {
+      const el = document.getElementById(`col-${c}`);
+      if (el) el.classList.remove('pista');
+    }
+  }
+
+  // Calcula la mejor columna para el HUMANO (minimax invertido, profundidad 4)
+  function mejorColumnaParaHumano() {
+    const validas = colsValidas(tablero);
+    // Victoria inmediata
+    for (const c of validas) {
+      const nt = tablero.map(f => [...f]); soltar(nt, c, HUMANO);
+      if (hayGanador(nt, HUMANO)) return c;
+    }
+    // Bloqueo urgente
+    for (const c of validas) {
+      const nt = tablero.map(f => [...f]); soltar(nt, c, IA);
+      if (hayGanador(nt, IA)) return c;
+    }
+    // Minimax desde perspectiva del humano (prof 4)
+    const ordenadas = [...validas].sort((a, b) => Math.abs(a-3) - Math.abs(b-3));
+    let mejorPts = -Infinity, mejorCol = ordenadas[0];
+    for (const c of ordenadas) {
+      const nt = tablero.map(f => [...f]); soltar(nt, c, HUMANO);
+      const pts = minimaxHumano(nt, 3, -Infinity, Infinity, false);
+      if (pts > mejorPts) { mejorPts = pts; mejorCol = c; }
+    }
+    return mejorCol;
+  }
+
+  function minimaxHumano(t, prof, alfa, beta, esHumano) {
+    if (hayGanador(t, HUMANO)) return  10000 + prof;
+    if (hayGanador(t, IA))     return -10000 - prof;
+    const validas = colsValidas(t);
+    if (!validas.length || prof === 0) return -puntuarTablero(t);
+    const ord = [...validas].sort((a, b) => Math.abs(a-3) - Math.abs(b-3));
+    if (esHumano) {
+      let m = -Infinity;
+      for (const c of ord) {
+        const nt = t.map(f => [...f]); soltar(nt, c, HUMANO);
+        m = Math.max(m, minimaxHumano(nt, prof-1, alfa, beta, false));
+        alfa = Math.max(alfa, m); if (beta <= alfa) break;
+      }
+      return m;
+    } else {
+      let m = Infinity;
+      for (const c of ord) {
+        const nt = t.map(f => [...f]); soltar(nt, c, IA);
+        m = Math.min(m, minimaxHumano(nt, prof-1, alfa, beta, true));
+        beta = Math.min(beta, m); if (beta <= alfa) break;
+      }
+      return m;
+    }
   }
 
   // ─────────────────────────────────────────────────────
   // JUGADA HUMANA
   // ─────────────────────────────────────────────────────
+  function actualizarBtnUndo() {
+    const btn = document.getElementById('btn-undo');
+    if (!btn || modo !== 'entrena') return;
+    btn.disabled = historial.length === 0 || finJuego || iaActiva;
+  }
+
+  function deshacerJugada() {
+    if (historial.length === 0 || finJuego || iaActiva) return;
+    const snap = historial.pop();
+    tablero = snap.tablero;
+    stats   = snap.stats;
+    // Redibujar tablero completo
+    for (let f = 0; f < FILAS; f++) {
+      for (let c = 0; c < COLS; c++) {
+        const val = tablero[f][c];
+        const el  = document.getElementById(`c${f}-${c}`);
+        if (el) el.className = 'cell' + (val === HUMANO ? ' human' : val === IA ? ' ai' : '');
+      }
+    }
+    turnoHumano = true;
+    finJuego    = false;
+    habilitarCols(true);
+    setStatus('↩ Jugada deshecha — elige de nuevo', '');
+    actualizarBtnUndo();
+    setTimeout(mostrarPista, 150);
+  }
+
   function clickCol(col) {
     if (!turnoHumano || finJuego || iaActiva) return;
-    if (tablero[0][col] !== 0) return; // llena
+    if (tablero[0][col] !== 0) return;
+
+    // Guardar snapshot ANTES de la jugada (para undo)
+    if (modo === 'entrena') {
+      historial.push({
+        tablero: tablero.map(f => [...f]),
+        stats:   JSON.parse(JSON.stringify(stats)),
+      });
+      actualizarBtnUndo();
+    }
+
+    quitarPista();
+
+    // ── Registrar stats ANTES de colocar la ficha ──
+    // ¿Había amenaza de la IA que no se bloqueó?
+    if (stats.amenazaIAAntes >= 0 && col !== stats.amenazaIAAntes) {
+      stats.bloqueosPercidos++;
+    }
+    // Centralidad del movimiento
+    if (col >= 2 && col <= 4) stats.centro++; else stats.extremos++;
+    stats.movimientos.push(col);
 
     const fila = soltar(tablero, col, HUMANO);
     dibujarCelda(fila, col, 'human', true);
 
+    // ¿Doble amenaza creada?
+    const amenazasAhora = colsValidas(tablero).filter(c => {
+      const nt = tablero.map(f => [...f]); soltar(nt, c, HUMANO); return hayGanador(nt, HUMANO);
+    }).length;
+    if (amenazasAhora >= 2) stats.forksCreados++;
+
     const ganadoras = buscarGanadora(tablero, HUMANO);
     if (ganadoras) {
       resaltarGanadora(ganadoras);
-      finJuego = true;
-      marcador.humano++;
-      actualizarMarcador();
+      finJuego = true; marcador.humano++; actualizarMarcador();
       setStatus('🎉 ¡Ganaste! Buen movimiento.', 'human-win');
       habilitarCols(false);
+      actualizarBtnUndo();
+      lanzarConfetti();
+      setTimeout(() => mostrarAnalisis(true), 800);
       return;
     }
     if (tableroLleno()) {
       finJuego = true; marcador.empate++; actualizarMarcador();
-      setStatus('🤝 Empate.', ''); return;
+      setStatus('🤝 Empate.', '');
+      actualizarBtnUndo();
+      setTimeout(() => mostrarAnalisis(null), 400);
+      return;
     }
 
-    turnoHumano = false;
-    iaActiva    = true;
+    turnoHumano = false; iaActiva = true;
     habilitarCols(false);
     setStatus('🤖 La IA está pensando...', 'ai-turn');
-
-    // Pausa breve para efecto "pensando"
     setTimeout(jugadaIA, modo === 'imposible' ? 650 : 350);
   }
 
@@ -365,33 +634,136 @@
   // JUGADA IA
   // ─────────────────────────────────────────────────────
   function jugadaIA() {
-    transTable = new Map(); // limpiar caché de posiciones anteriores
+    transTable = new Map();
     const col  = mejorColumna();
     const fila = soltar(tablero, col, IA);
     dibujarCelda(fila, col, 'ai', true);
     iaActiva = false;
 
+    // Registrar si la IA tiene amenaza para el próximo turno del humano
+    stats.amenazaIAAntes = -1;
+    const validas = colsValidas(tablero);
+    for (const c of validas) {
+      const nt = tablero.map(f => [...f]); soltar(nt, c, IA);
+      if (hayGanador(nt, IA)) { stats.amenazaIAAntes = c; break; }
+    }
+
     const ganadoras = buscarGanadora(tablero, IA);
     if (ganadoras) {
       resaltarGanadora(ganadoras);
-      finJuego = true;
-      marcador.ia++;
-      actualizarMarcador();
+      finJuego = true; marcador.ia++; actualizarMarcador();
       const frases = modo === 'imposible'
         ? ['💀 Inevitable. Minimax no falla.', '🤖 Análisis completado. Victoria de la IA.', '💀 Imposible de vencer con juego perfecto.']
         : ['🔴 Gana la IA. ¡Inténtalo de nuevo!', '🤖 Buena partida, pero gana la IA.'];
       setStatus(frases[Math.floor(Math.random() * frases.length)], 'ai-win');
       habilitarCols(false);
+      actualizarBtnUndo();
+      setTimeout(() => mostrarAnalisis(false), 400);
       return;
     }
     if (tableroLleno()) {
       finJuego = true; marcador.empate++; actualizarMarcador();
-      setStatus('🤝 Empate.', ''); return;
+      setStatus('🤝 Empate.', '');
+      actualizarBtnUndo();
+      setTimeout(() => mostrarAnalisis(null), 400);
+      return;
     }
 
     turnoHumano = true;
     habilitarCols(true);
     setStatus('🟡 Tu turno', '');
+    if (modo === 'entrena') setTimeout(mostrarPista, 200);
+  }
+
+  // ─────────────────────────────────────────────────────
+  // ANÁLISIS POST-PARTIDA
+  // ─────────────────────────────────────────────────────
+  function mostrarAnalisis(gano) {
+    // Solo mostrar si hay suficientes movimientos O si es modo entrena
+    if (stats.movimientos.length < 2) return;
+
+    const obs = generarObservaciones(gano);
+    if (!obs.length) return;
+
+    const container = document.getElementById('analysis-items');
+    container.innerHTML = obs.map(o =>
+      `<div class="analysis-item">
+        <div class="analysis-dot ${o.tipo}"></div>
+        <span>${o.texto}</span>
+      </div>`
+    ).join('');
+
+    document.getElementById('analysis-box').classList.add('visible');
+  }
+
+  function ocultarAnalisis() {
+    document.getElementById('analysis-box').classList.remove('visible');
+  }
+
+  function generarObservaciones(gano) {
+    const obs = [];
+    const n = stats.movimientos.length;
+    if (n === 0) return obs;
+
+    const pctCentro = stats.centro / n;
+
+    // Tendencia espacial
+    if (pctCentro < 0.35) {
+      obs.push({ tipo: 'red', texto: 'Jugaste demasiado en los extremos — el centro da el doble de líneas ganadoras posibles.' });
+    } else if (pctCentro >= 0.6) {
+      obs.push({ tipo: 'green', texto: 'Buena ocupación del centro — es la zona estratégicamente más valiosa del tablero.' });
+    }
+
+    // Bloqueos perdidos
+    if (stats.bloqueosPercidos >= 2) {
+      obs.push({ tipo: 'red', texto: `Dejaste ${stats.bloqueosPercidos} amenazas de la IA sin bloquear. La defensa activa es tan importante como atacar.` });
+    } else if (stats.bloqueosPercidos === 1) {
+      obs.push({ tipo: '', texto: 'Ignoraste una amenaza de la IA en un momento clave — en próximas partidas vigila sus series de 3.' });
+    } else if (n >= 5) {
+      obs.push({ tipo: 'green', texto: 'Excelente defensa — bloqueaste todas las amenazas de la IA a tiempo.' });
+    }
+
+    // Forks (dobles amenazas)
+    if (stats.forksCreados >= 2) {
+      obs.push({ tipo: 'green', texto: `Creaste ${stats.forksCreados} amenazas dobles — eso es pensamiento estratégico avanzado.` });
+    } else if (stats.forksCreados === 1) {
+      obs.push({ tipo: 'green', texto: 'Creaste una amenaza doble en algún momento — ese tipo de jugada es lo que vence a la IA.' });
+    }
+
+    // Resultado
+    if (gano === true) {
+      obs.push({ tipo: 'green', texto: 'Encontraste un fallo en el análisis de la IA. Eso requiere planificación de varios movimientos. Nivel alto.' });
+    } else if (gano === false && n <= 6) {
+      obs.push({ tipo: 'red', texto: 'Partida corta — la IA aprovechó un error en la apertura. Los primeros movimientos marcan el resto de la partida.' });
+    } else if (gano === null) {
+      obs.push({ tipo: '', texto: 'Empate — resististe bien, pero sin crear ventaja decisiva. Busca crear amenazas dobles en la siguiente partida.' });
+    }
+
+    return obs.slice(0, 3);
+  }
+
+  // ─────────────────────────────────────────────────────
+  // CONFETTI 🎊
+  // ─────────────────────────────────────────────────────
+  function lanzarConfetti() {
+    const wrap = document.getElementById('confetti-wrap');
+    wrap.innerHTML = '';
+    const colores = ['#fbbf24','#a040ff','#4ade80','#60a5fa','#f87171','#ffffff','#fb923c'];
+    for (let i = 0; i < 90; i++) {
+      const p = document.createElement('div');
+      p.className = 'conf';
+      const size = 5 + Math.random() * 7;
+      p.style.cssText = `
+        left: ${Math.random() * 100}vw;
+        width: ${size}px; height: ${size}px;
+        background: ${colores[Math.floor(Math.random() * colores.length)]};
+        border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+        animation-duration: ${1.5 + Math.random() * 2.5}s;
+        animation-delay: ${Math.random() * 0.8}s;
+      `;
+      wrap.appendChild(p);
+    }
+    setTimeout(() => { wrap.innerHTML = ''; }, 5000);
   }
 
   // ─────────────────────────────────────────────────────
@@ -422,10 +794,7 @@
   }
 
   function resaltarGanadora(celdas) {
-    celdas.forEach(([f, c]) => {
-      const el = document.getElementById(`c${f}-${c}`);
-      el.classList.add('ganadora');
-    });
+    celdas.forEach(([f, c]) => document.getElementById(`c${f}-${c}`).classList.add('ganadora'));
   }
 
   function habilitarCols(on) {
@@ -445,6 +814,7 @@
     document.getElementById('pts-human').textContent = marcador.humano;
     document.getElementById('pts-ai').textContent    = marcador.ia;
     document.getElementById('pts-draw').textContent  = marcador.empate;
+    if (modo) guardarMarcador();
   }
 
   // ─────────────────────────────────────────────────────
@@ -464,25 +834,21 @@
   }
 
   function buscarGanadora(t, p) {
-    // Horizontal
     for (let f = 0; f < FILAS; f++)
-      for (let c = 0; c < COLS - 3; c++)
-        if (t[f][c]===p && t[f][c+1]===p && t[f][c+2]===p && t[f][c+3]===p)
+      for (let c = 0; c < COLS-3; c++)
+        if (t[f][c]===p&&t[f][c+1]===p&&t[f][c+2]===p&&t[f][c+3]===p)
           return [[f,c],[f,c+1],[f,c+2],[f,c+3]];
-    // Vertical
     for (let c = 0; c < COLS; c++)
-      for (let f = 0; f < FILAS - 3; f++)
-        if (t[f][c]===p && t[f+1][c]===p && t[f+2][c]===p && t[f+3][c]===p)
+      for (let f = 0; f < FILAS-3; f++)
+        if (t[f][c]===p&&t[f+1][c]===p&&t[f+2][c]===p&&t[f+3][c]===p)
           return [[f,c],[f+1,c],[f+2,c],[f+3,c]];
-    // Diagonal /
     for (let f = 3; f < FILAS; f++)
-      for (let c = 0; c < COLS - 3; c++)
-        if (t[f][c]===p && t[f-1][c+1]===p && t[f-2][c+2]===p && t[f-3][c+3]===p)
+      for (let c = 0; c < COLS-3; c++)
+        if (t[f][c]===p&&t[f-1][c+1]===p&&t[f-2][c+2]===p&&t[f-3][c+3]===p)
           return [[f,c],[f-1,c+1],[f-2,c+2],[f-3,c+3]];
-    // Diagonal \
-    for (let f = 0; f < FILAS - 3; f++)
-      for (let c = 0; c < COLS - 3; c++)
-        if (t[f][c]===p && t[f+1][c+1]===p && t[f+2][c+2]===p && t[f+3][c+3]===p)
+    for (let f = 0; f < FILAS-3; f++)
+      for (let c = 0; c < COLS-3; c++)
+        if (t[f][c]===p&&t[f+1][c+1]===p&&t[f+2][c+2]===p&&t[f+3][c+3]===p)
           return [[f,c],[f+1,c+1],[f+2,c+2],[f+3,c+3]];
     return null;
   }
@@ -495,115 +861,83 @@
   let transTable = new Map();
 
   function puntuarVentana(v) {
-    const ia = v.filter(x => x === IA).length;
-    const hu = v.filter(x => x === HUMANO).length;
-    const em = v.filter(x => x === 0).length;
-    if (ia === 4) return 1000;
-    if (ia === 3 && em === 1) return 15;
-    if (ia === 2 && em === 2) return 5;
-    if (hu === 3 && em === 1) return -120;
-    if (hu === 2 && em === 2) return -5;
+    const ia=v.filter(x=>x===IA).length, hu=v.filter(x=>x===HUMANO).length, em=v.filter(x=>x===0).length;
+    if (ia===4) return 1000;
+    if (ia===3&&em===1) return 15;
+    if (ia===2&&em===2) return 5;
+    if (hu===3&&em===1) return -120;
+    if (hu===2&&em===2) return -5;
     return 0;
   }
 
   function puntuarTablero(t) {
     let s = 0;
-    for (let f = 0; f < FILAS; f++) if (t[f][3] === IA) s += 6;
-    for (let f = 0; f < FILAS; f++)
-      for (let c = 0; c < COLS - 3; c++)
-        s += puntuarVentana([t[f][c], t[f][c+1], t[f][c+2], t[f][c+3]]);
-    for (let c = 0; c < COLS; c++)
-      for (let f = 0; f < FILAS - 3; f++)
-        s += puntuarVentana([t[f][c], t[f+1][c], t[f+2][c], t[f+3][c]]);
-    for (let f = 3; f < FILAS; f++)
-      for (let c = 0; c < COLS - 3; c++)
-        s += puntuarVentana([t[f][c], t[f-1][c+1], t[f-2][c+2], t[f-3][c+3]]);
-    for (let f = 0; f < FILAS - 3; f++)
-      for (let c = 0; c < COLS - 3; c++)
-        s += puntuarVentana([t[f][c], t[f+1][c+1], t[f+2][c+2], t[f+3][c+3]]);
+    for (let f=0;f<FILAS;f++) if(t[f][3]===IA) s+=6;
+    for (let f=0;f<FILAS;f++) for(let c=0;c<COLS-3;c++) s+=puntuarVentana([t[f][c],t[f][c+1],t[f][c+2],t[f][c+3]]);
+    for (let c=0;c<COLS;c++) for(let f=0;f<FILAS-3;f++) s+=puntuarVentana([t[f][c],t[f+1][c],t[f+2][c],t[f+3][c]]);
+    for (let f=3;f<FILAS;f++) for(let c=0;c<COLS-3;c++) s+=puntuarVentana([t[f][c],t[f-1][c+1],t[f-2][c+2],t[f-3][c+3]]);
+    for (let f=0;f<FILAS-3;f++) for(let c=0;c<COLS-3;c++) s+=puntuarVentana([t[f][c],t[f+1][c+1],t[f+2][c+2],t[f+3][c+3]]);
     return s;
   }
 
-  // Ordena movimientos: primero ganadores, luego bloqueadores, luego por centro
   function ordenarMovimientos(t, validas) {
-    const gana = [], bloquea = [], resto = [];
+    const gana=[],bloquea=[],resto=[];
     for (const c of validas) {
-      const ntIA = t.map(f => [...f]); soltar(ntIA, c, IA);
-      if (hayGanador(ntIA, IA)) { gana.push(c); continue; }
-      const ntHU = t.map(f => [...f]); soltar(ntHU, c, HUMANO);
-      if (hayGanador(ntHU, HUMANO)) { bloquea.push(c); continue; }
+      const ntIA=t.map(f=>[...f]); soltar(ntIA,c,IA);
+      if (hayGanador(ntIA,IA)) { gana.push(c); continue; }
+      const ntHU=t.map(f=>[...f]); soltar(ntHU,c,HUMANO);
+      if (hayGanador(ntHU,HUMANO)) { bloquea.push(c); continue; }
       resto.push(c);
     }
-    resto.sort((a, b) => Math.abs(a - 3) - Math.abs(b - 3));
-    return [...gana, ...bloquea, ...resto];
+    resto.sort((a,b)=>Math.abs(a-3)-Math.abs(b-3));
+    return [...gana,...bloquea,...resto];
   }
 
   function minimax(t, prof, alfa, beta, maximizar) {
-    if (hayGanador(t, IA))     return 100000 + prof;
-    if (hayGanador(t, HUMANO)) return -100000 - prof;
-    const validas = colsValidas(t);
-    if (!validas.length || prof === 0) return puntuarTablero(t);
+    if (hayGanador(t,IA))     return 100000+prof;
+    if (hayGanador(t,HUMANO)) return -100000-prof;
+    const validas=colsValidas(t);
+    if (!validas.length||prof===0) return puntuarTablero(t);
 
-    // Tabla de transposición: evita recalcular posiciones ya vistas
-    const clave = t.flat().join('') + (maximizar ? '1' : '0');
-    const cached = transTable.get(clave);
-    if (cached !== undefined && cached.prof >= prof) return cached.val;
+    const clave=t.flat().join('')+(maximizar?'1':'0');
+    const cached=transTable.get(clave);
+    if (cached!==undefined&&cached.prof>=prof) return cached.val;
 
-    const ordenadas = ordenarMovimientos(t, validas);
-
+    const ordenadas=ordenarMovimientos(t,validas);
     let mejor;
     if (maximizar) {
-      mejor = -Infinity;
+      mejor=-Infinity;
       for (const c of ordenadas) {
-        const nt = t.map(f => [...f]); soltar(nt, c, IA);
-        mejor = Math.max(mejor, minimax(nt, prof - 1, alfa, beta, false));
-        alfa  = Math.max(alfa, mejor);
-        if (beta <= alfa) break;
+        const nt=t.map(f=>[...f]); soltar(nt,c,IA);
+        mejor=Math.max(mejor,minimax(nt,prof-1,alfa,beta,false));
+        alfa=Math.max(alfa,mejor); if(beta<=alfa) break;
       }
     } else {
-      mejor = Infinity;
+      mejor=Infinity;
       for (const c of ordenadas) {
-        const nt = t.map(f => [...f]); soltar(nt, c, HUMANO);
-        mejor = Math.min(mejor, minimax(nt, prof - 1, alfa, beta, true));
-        beta  = Math.min(beta, mejor);
-        if (beta <= alfa) break;
+        const nt=t.map(f=>[...f]); soltar(nt,c,HUMANO);
+        mejor=Math.min(mejor,minimax(nt,prof-1,alfa,beta,true));
+        beta=Math.min(beta,mejor); if(beta<=alfa) break;
       }
     }
-
-    transTable.set(clave, { val: mejor, prof });
+    transTable.set(clave,{val:mejor,prof});
     return mejor;
   }
 
   function mejorColumna() {
-    const validas = colsValidas(tablero);
-
-    // Modo normal: 25% aleatorio
-    if (modo === 'normal' && Math.random() < 0.25) {
-      return validas[Math.floor(Math.random() * validas.length)];
-    }
-
-    // Primer movimiento en imposible → centro (apertura ganadora teórica)
-    const totalFichas = tablero.flat().filter(x => x !== 0).length;
-    if (modo === 'imposible' && totalFichas === 0) return 3;
-
-    // Comprobar victoria o bloqueo inmediato antes del minimax completo
-    for (const c of validas) {
-      const nt = tablero.map(f => [...f]); soltar(nt, c, IA);
-      if (hayGanador(nt, IA)) return c; // ganar ahora
-    }
-    for (const c of validas) {
-      const nt = tablero.map(f => [...f]); soltar(nt, c, HUMANO);
-      if (hayGanador(nt, HUMANO)) return c; // bloquear ahora
-    }
-
-    const profundidad = modo === 'imposible' ? 11 : 4;
-    const ordenadas   = ordenarMovimientos(tablero, validas);
-
-    let mejorPts = -Infinity, mejorCol = ordenadas[0];
+    const validas=colsValidas(tablero);
+    if (modo==='normal'&&Math.random()<0.25) return validas[Math.floor(Math.random()*validas.length)];
+    const total=tablero.flat().filter(x=>x!==0).length;
+    if (modo==='imposible'&&total===0) return 3;
+    for (const c of validas) { const nt=tablero.map(f=>[...f]); soltar(nt,c,IA); if(hayGanador(nt,IA)) return c; }
+    for (const c of validas) { const nt=tablero.map(f=>[...f]); soltar(nt,c,HUMANO); if(hayGanador(nt,HUMANO)) return c; }
+    const prof = modo==='imposible' ? 11 : (modo==='entrena' ? 5 : 4);
+    const ordenadas=ordenarMovimientos(tablero,validas);
+    let mejorPts=-Infinity, mejorCol=ordenadas[0];
     for (const c of ordenadas) {
-      const nt = tablero.map(f => [...f]); soltar(nt, c, IA);
-      const pts = minimax(nt, profundidad - 1, -Infinity, Infinity, false);
-      if (pts > mejorPts) { mejorPts = pts; mejorCol = c; }
+      const nt=tablero.map(f=>[...f]); soltar(nt,c,IA);
+      const pts=minimax(nt,prof-1,-Infinity,Infinity,false);
+      if(pts>mejorPts){mejorPts=pts;mejorCol=c;}
     }
     return mejorCol;
   }
