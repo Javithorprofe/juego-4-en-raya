@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>4 en Raya — IA</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: #0d0d1a;
+      color: #fff;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── PANTALLAS ─────────────────────────── */
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 24px 16px 32px;
+      max-width: 440px;
+      width: 100%;
+    }
+    .screen.active { display: flex; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    h1 { font-size: 2rem; font-weight: 900; margin-bottom: 8px; }
+    .subtitulo { color: #8888bb; font-size: 0.95rem; line-height: 1.5; margin-bottom: 4px; }
+    .emoji-big { font-size: 3rem; margin-bottom: 12px; }
+
+    /* ── BOTONES ───────────────────────────── */
+    .btn {
+      background: linear-gradient(135deg, #6a3fff, #a040ff);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 32px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      max-width: 300px;
+      margin-top: 12px;
+      transition: transform 0.1s;
+      box-shadow: 0 4px 20px rgba(106,63,255,0.35);
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn.outline {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: none;
+      font-size: 0.9rem;
+    }
+
+    /* ── TARJETAS DE MODO ──────────────────── */
+    .mode-cards { display: flex; gap: 12px; margin-top: 20px; width: 100%; }
+    .mode-card {
+      flex: 1;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 16px 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(255,255,255,0.03);
+      user-select: none;
+    }
+    .mode-card.sel-normal  { border-color: #6a3fff; background: rgba(106,63,255,0.15); }
+    .mode-card.sel-imposible { border-color: #ef4444; background: rgba(239,68,68,0.12); }
+    .mode-icon { font-size: 2rem; margin-bottom: 6px; }
+    .mode-name { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .mode-desc { font-size: 0.72rem; color: #8888bb; }
+
+    /* ── CABECERA DEL JUEGO ────────────────── */
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 8px;
+    }
+    .score-box { text-align: center; min-width: 60px; }
+    .score-num { font-size: 1.6rem; font-weight: 900; line-height: 1; }
+    .score-lbl { font-size: 0.62rem; color: #8888bb; margin-top: 2px; letter-spacing: 1px; }
+    .score-num.human { color: #fbbf24; }
+    .score-num.ai    { color: #ef4444; }
+    .score-num.draw  { color: #666; }
+
+    .mode-badge {
+      background: rgba(255,255,255,0.07);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      color: #b89dff;
+    }
+    .mode-badge.imposible { color: #f87171; }
+
+    /* ── STATUS ────────────────────────────── */
+    .status {
+      font-size: 0.9rem;
+      color: #b89dff;
+      margin: 6px 0 10px;
+      min-height: 1.5em;
+      transition: color 0.3s;
+    }
+    .status.ai-turn { color: #f87171; }
+    .status.human-win { color: #4ade80; }
+    .status.ai-win { color: #f87171; }
+
+    /* ── TABLERO ───────────────────────────── */
+    .board-wrap {
+      background: #1a1754;
+      border-radius: 18px;
+      padding: 10px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .board { display: flex; gap: 5px; }
+    .col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      border-radius: 8px;
+      padding: 3px;
+      transition: background 0.15s;
+      position: relative;
+    }
+    .col:hover:not(.disabled) { background: rgba(255,255,255,0.07); }
+    .col.disabled { cursor: default; }
+
+    /* ── INDICADOR DE COLUMNA ──────────────── */
+    .col::before {
+      content: '▼';
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: #fbbf24;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .col:hover:not(.disabled)::before { opacity: 1; }
+
+    /* ── CELDAS ────────────────────────────── */
+    .cell {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.4);
+    }
+    .cell.human {
+      background: #fbbf24;
+      box-shadow: 0 0 10px rgba(251,191,36,0.5);
+    }
+    .cell.ai {
+      background: #ef4444;
+      box-shadow: 0 0 10px rgba(239,68,68,0.5);
+    }
+    @keyframes caer {
+      from { transform: translateY(-300%) scaleY(0.6); opacity: 0.7; }
+      to   { transform: none; opacity: 1; }
+    }
+    .cell.nueva { animation: caer 0.18s cubic-bezier(.4,1.4,.6,1) both; }
+
+    @keyframes ganar {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.18); }
+    }
+    .cell.ganadora { animation: ganar 0.55s ease-in-out infinite; }
+    .cell.human.ganadora { box-shadow: 0 0 22px rgba(251,191,36,0.9); }
+    .cell.ai.ganadora    { box-shadow: 0 0 22px rgba(239,68,68,0.9); }
+
+    /* ── LEYENDA ───────────────────────────── */
+    .legend {
+      display: flex;
+      gap: 20px;
+      margin-top: 10px;
+      font-size: 0.78rem;
+      color: #8888bb;
+    }
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 11px; height: 11px; border-radius: 50%; }
+    .dot.human { background: #fbbf24; }
+    .dot.ai    { background: #ef4444; }
+
+    /* ── BADGE IA ──────────────────────────── */
+    .ia-nota {
+      background: rgba(106,63,255,0.12);
+      border: 1px solid rgba(106,63,255,0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin: 14px 0 4px;
+      font-size: 0.82rem;
+      color: #b89dff;
+      line-height: 1.5;
+      text-align: left;
+      width: 100%;
+      max-width: 340px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ░░ INICIO ░░ -->
+  <div class="screen active" id="s-inicio">
+    <div class="emoji-big">🤖</div>
+    <h1>4 en Raya</h1>
+    <p class="subtitulo">Juega contra una IA con algoritmo <strong>minimax</strong>.<br>Elige tu dificultad:</p>
+
+    <div class="mode-cards">
+      <div class="mode-card sel-normal" id="card-normal" onclick="elegirModo('normal')">
+        <div class="mode-icon">🙂</div>
+        <div class="mode-name">Normal</div>
+        <div class="mode-desc">Puedes ganar si piensas bien</div>
+      </div>
+      <div class="mode-card" id="card-imposible" onclick="elegirModo('imposible')">
+        <div class="mode-icon">💀</div>
+        <div class="mode-name">Imposible</div>
+        <div class="mode-desc">La IA no comete errores</div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="iniciarJuego()">¡Jugar!</button>
+  </div>
+
+  <!-- ░░ JUEGO ░░ -->
+  <div class="screen" id="s-juego">
+    <div class="game-header">
+      <div class="score-box">
+        <div class="score-num human" id="pts-human">0</div>
+        <div class="score-lbl">TÚ</div>
+      </div>
+      <div class="score-box">
+        <span class="mode-badge" id="modo-badge">Normal</span>
+        <div class="score-num draw" id="pts-draw" style="margin-top:4px">0</div>
+        <div class="score-lbl">EMPATES</div>
+      </div>
+      <div class="score-box">
+        <div class="score-num ai" id="pts-ai">0</div>
+        <div class="score-lbl">IA</div>
+      </div>
+    </div>
+
+    <div class="status" id="status">Tu turno</div>
+
+    <div class="board-wrap" style="margin-top:8px">
+      <div class="board" id="tablero"></div>
+    </div>
+
+    <div class="legend">
+      <span><div class="dot human"></div> Tú (amarillo)</span>
+      <span><div class="dot ai"></div> IA (rojo)</span>
+    </div>
+
+    <button class="btn" onclick="nuevaRonda()" style="margin-top:14px">Nueva partida</button>
+    <button class="btn outline" onclick="pantalla('s-inicio')">Cambiar modo</button>
+
+    <div class="ia-nota">
+      🧠 Esta IA usa el algoritmo <strong>minimax con poda alfa-beta</strong> —
+      el mismo principio que usa el ajedrez por ordenador.
+      En modo imposible evalúa miles de jugadas por movimiento.
+    </div>
+  </div>
+
+  <script>
+  // ─────────────────────────────────────────────────────
+  // CONSTANTES
+  // ─────────────────────────────────────────────────────
+  const FILAS = 6, COLS = 7;
+  const HUMANO = 1, IA = 2;
+
+  // ─────────────────────────────────────────────────────
+  // ESTADO
+  // ─────────────────────────────────────────────────────
+  let tablero, finJuego, iaActiva, turnoHumano, modo;
+  let marcador = { humano: 0, ia: 0, empate: 0 };
+  let modoElegido = 'normal';
+
+  // ─────────────────────────────────────────────────────
+  // PANTALLAS
+  // ─────────────────────────────────────────────────────
+  function pantalla(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // ─────────────────────────────────────────────────────
+  // SELECCIÓN DE MODO
+  // ─────────────────────────────────────────────────────
+  function elegirModo(m) {
+    modoElegido = m;
+    document.getElementById('card-normal').className    = 'mode-card' + (m==='normal' ? ' sel-normal' : '');
+    document.getElementById('card-imposible').className = 'mode-card' + (m==='imposible' ? ' sel-imposible' : '');
+  }
+
+  function iniciarJuego() {
+    modo = modoElegido;
+    marcador = { humano: 0, ia: 0, empate: 0 };
+    actualizarMarcador();
+    const badge = document.getElementById('modo-badge');
+    badge.textContent = modo === 'imposible' ? '💀 Imposible' : '🙂 Normal';
+    badge.className = 'mode-badge' + (modo === 'imposible' ? ' imposible' : '');
+    pantalla('s-juego');
+    nuevaRonda();
+  }
+
+  // ─────────────────────────────────────────────────────
+  // RONDA
+  // ─────────────────────────────────────────────────────
+  function nuevaRonda() {
+    tablero  = Array(FILAS).fill(null).map(() => Array(COLS).fill(0));
+    finJuego = false;
+    iaActiva = false;
+    turnoHumano = true;
+    construirTablero();
+    setStatus('🟡 Tu turno — toca una columna', '');
+    habilitarCols(true);
+  }
+
+  // ─────────────────────────────────────────────────────
+  // JUGADA HUMANA
+  // ─────────────────────────────────────────────────────
+  function clickCol(col) {
+    if (!turnoHumano || finJuego || iaActiva) return;
+    if (tablero[0][col] !== 0) return; // llena
+
+    const fila = soltar(tablero, col, HUMANO);
+    dibujarCelda(fila, col, 'human', true);
+
+    const ganadoras = buscarGanadora(tablero, HUMANO);
+    if (ganadoras) {
+      resaltarGanadora(ganadoras);
+      finJuego = true;
+      marcador.humano++;
+      actualizarMarcador();
+      setStatus('🎉 ¡Ganaste! Buen movimiento.', 'human-win');
+      habilitarCols(false);
+      return;
+    }
+    if (tableroLleno()) {
+      finJuego = true; marcador.empate++; actualizarMarcador();
+      setStatus('🤝 Empate.', ''); return;
+    }
+
+    turnoHumano = false;
+    iaActiva    = true;
+    habilitarCols(false);
+    setStatus('🤖 La IA está pensando...', 'ai-turn');
+
+    // Pausa breve para efecto "pensando"
+    setTimeout(jugadaIA, modo === 'imposible' ? 650 : 350);
+  }
+
+  // ─────────────────────────────────────────────────────
+  // JUGADA IA
+  // ─────────────────────────────────────────────────────
+  function jugadaIA() {
+    transTable = new Map(); // limpiar caché de posiciones anteriores
+    const col  = mejorColumna();
+    const fila = soltar(tablero, col, IA);
+    dibujarCelda(fila, col, 'ai', true);
+    iaActiva = false;
+
+    const ganadoras = buscarGanadora(tablero, IA);
+    if (ganadoras) {
+      resaltarGanadora(ganadoras);
+      finJuego = true;
+      marcador.ia++;
+      actualizarMarcador();
+      const frases = modo === 'imposible'
+        ? ['💀 Inevitable. Minimax no falla.', '🤖 Análisis completado. Victoria de la IA.', '💀 Imposible de vencer con juego perfecto.']
+        : ['🔴 Gana la IA. ¡Inténtalo de nuevo!', '🤖 Buena partida, pero gana la IA.'];
+      setStatus(frases[Math.floor(Math.random() * frases.length)], 'ai-win');
+      habilitarCols(false);
+      return;
+    }
+    if (tableroLleno()) {
+      finJuego = true; marcador.empate++; actualizarMarcador();
+      setStatus('🤝 Empate.', ''); return;
+    }
+
+    turnoHumano = true;
+    habilitarCols(true);
+    setStatus('🟡 Tu turno', '');
+  }
+
+  // ─────────────────────────────────────────────────────
+  // TABLERO HTML
+  // ─────────────────────────────────────────────────────
+  function construirTablero() {
+    const t = document.getElementById('tablero');
+    t.innerHTML = '';
+    for (let c = 0; c < COLS; c++) {
+      const colDiv = document.createElement('div');
+      colDiv.className = 'col';
+      colDiv.id = `col-${c}`;
+      colDiv.addEventListener('click', () => clickCol(c));
+      for (let f = 0; f < FILAS; f++) {
+        const celda = document.createElement('div');
+        celda.className = 'cell';
+        celda.id = `c${f}-${c}`;
+        colDiv.appendChild(celda);
+      }
+      t.appendChild(colDiv);
+    }
+  }
+
+  function dibujarCelda(fila, col, cls, animar) {
+    const el = document.getElementById(`c${fila}-${col}`);
+    el.className = 'cell ' + cls + (animar ? ' nueva' : '');
+    if (animar) setTimeout(() => el.classList.remove('nueva'), 250);
+  }
+
+  function resaltarGanadora(celdas) {
+    celdas.forEach(([f, c]) => {
+      const el = document.getElementById(`c${f}-${c}`);
+      el.classList.add('ganadora');
+    });
+  }
+
+  function habilitarCols(on) {
+    for (let c = 0; c < COLS; c++) {
+      const el = document.getElementById(`col-${c}`);
+      if (el) el.classList.toggle('disabled', !on);
+    }
+  }
+
+  function setStatus(msg, cls) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = 'status' + (cls ? ' ' + cls : '');
+  }
+
+  function actualizarMarcador() {
+    document.getElementById('pts-human').textContent = marcador.humano;
+    document.getElementById('pts-ai').textContent    = marcador.ia;
+    document.getElementById('pts-draw').textContent  = marcador.empate;
+  }
+
+  // ─────────────────────────────────────────────────────
+  // LÓGICA DE JUEGO
+  // ─────────────────────────────────────────────────────
+  function soltar(t, col, jugador) {
+    for (let f = FILAS - 1; f >= 0; f--) {
+      if (t[f][col] === 0) { t[f][col] = jugador; return f; }
+    }
+    return -1;
+  }
+
+  function tableroLleno() { return tablero[0].every(c => c !== 0); }
+
+  function colsValidas(t) {
+    return Array.from({length: COLS}, (_, c) => c).filter(c => t[0][c] === 0);
+  }
+
+  function buscarGanadora(t, p) {
+    // Horizontal
+    for (let f = 0; f < FILAS; f++)
+      for (let c = 0; c < COLS - 3; c++)
+        if (t[f][c]===p && t[f][c+1]===p && t[f][c+2]===p && t[f][c+3]===p)
+          return [[f,c],[f,c+1],[f,c+2],[f,c+3]];
+    // Vertical
+    for (let c = 0; c < COLS; c++)
+      for (let f = 0; f < FILAS - 3; f++)
+        if (t[f][c]===p && t[f+1][c]===p && t[f+2][c]===p && t[f+3][c]===p)
+          return [[f,c],[f+1,c],[f+2,c],[f+3,c]];
+    // Diagonal /
+    for (let f = 3; f < FILAS; f++)
+      for (let c = 0; c < COLS - 3; c++)
+        if (t[f][c]===p && t[f-1][c+1]===p && t[f-2][c+2]===p && t[f-3][c+3]===p)
+          return [[f,c],[f-1,c+1],[f-2,c+2],[f-3,c+3]];
+    // Diagonal \
+    for (let f = 0; f < FILAS - 3; f++)
+      for (let c = 0; c < COLS - 3; c++)
+        if (t[f][c]===p && t[f+1][c+1]===p && t[f+2][c+2]===p && t[f+3][c+3]===p)
+          return [[f,c],[f+1,c+1],[f+2,c+2],[f+3,c+3]];
+    return null;
+  }
+
+  function hayGanador(t, p) { return !!buscarGanadora(t, p); }
+
+  // ─────────────────────────────────────────────────────
+  // MINIMAX CON PODA ALFA-BETA + TABLA DE TRANSPOSICIÓN
+  // ─────────────────────────────────────────────────────
+  let transTable = new Map();
+
+  function puntuarVentana(v) {
+    const ia = v.filter(x => x === IA).length;
+    const hu = v.filter(x => x === HUMANO).length;
+    const em = v.filter(x => x === 0).length;
+    if (ia === 4) return 1000;
+    if (ia === 3 && em === 1) return 15;
+    if (ia === 2 && em === 2) return 5;
+    if (hu === 3 && em === 1) return -120;
+    if (hu === 2 && em === 2) return -5;
+    return 0;
+  }
+
+  function puntuarTablero(t) {
+    let s = 0;
+    for (let f = 0; f < FILAS; f++) if (t[f][3] === IA) s += 6;
+    for (let f = 0; f < FILAS; f++)
+      for (let c = 0; c < COLS - 3; c++)
+        s += puntuarVentana([t[f][c], t[f][c+1], t[f][c+2], t[f][c+3]]);
+    for (let c = 0; c < COLS; c++)
+      for (let f = 0; f < FILAS - 3; f++)
+        s += puntuarVentana([t[f][c], t[f+1][c], t[f+2][c], t[f+3][c]]);
+    for (let f = 3; f < FILAS; f++)
+      for (let c = 0; c < COLS - 3; c++)
+        s += puntuarVentana([t[f][c], t[f-1][c+1], t[f-2][c+2], t[f-3][c+3]]);
+    for (let f = 0; f < FILAS - 3; f++)
+      for (let c = 0; c < COLS - 3; c++)
+        s += puntuarVentana([t[f][c], t[f+1][c+1], t[f+2][c+2], t[f+3][c+3]]);
+    return s;
+  }
+
+  // Ordena movimientos: primero ganadores, luego bloqueadores, luego por centro
+  function ordenarMovimientos(t, validas) {
+    const gana = [], bloquea = [], resto = [];
+    for (const c of validas) {
+      const ntIA = t.map(f => [...f]); soltar(ntIA, c, IA);
+      if (hayGanador(ntIA, IA)) { gana.push(c); continue; }
+      const ntHU = t.map(f => [...f]); soltar(ntHU, c, HUMANO);
+      if (hayGanador(ntHU, HUMANO)) { bloquea.push(c); continue; }
+      resto.push(c);
+    }
+    resto.sort((a, b) => Math.abs(a - 3) - Math.abs(b - 3));
+    return [...gana, ...bloquea, ...resto];
+  }
+
+  function minimax(t, prof, alfa, beta, maximizar) {
+    if (hayGanador(t, IA))     return 100000 + prof;
+    if (hayGanador(t, HUMANO)) return -100000 - prof;
+    const validas = colsValidas(t);
+    if (!validas.length || prof === 0) return puntuarTablero(t);
+
+    // Tabla de transposición: evita recalcular posiciones ya vistas
+    const clave = t.flat().join('') + (maximizar ? '1' : '0');
+    const cached = transTable.get(clave);
+    if (cached !== undefined && cached.prof >= prof) return cached.val;
+
+    const ordenadas = ordenarMovimientos(t, validas);
+
+    let mejor;
+    if (maximizar) {
+      mejor = -Infinity;
+      for (const c of ordenadas) {
+        const nt = t.map(f => [...f]); soltar(nt, c, IA);
+        mejor = Math.max(mejor, minimax(nt, prof - 1, alfa, beta, false));
+        alfa  = Math.max(alfa, mejor);
+        if (beta <= alfa) break;
+      }
+    } else {
+      mejor = Infinity;
+      for (const c of ordenadas) {
+        const nt = t.map(f => [...f]); soltar(nt, c, HUMANO);
+        mejor = Math.min(mejor, minimax(nt, prof - 1, alfa, beta, true));
+        beta  = Math.min(beta, mejor);
+        if (beta <= alfa) break;
+      }
+    }
+
+    transTable.set(clave, { val: mejor, prof });
+    return mejor;
+  }
+
+  function mejorColumna() {
+    const validas = colsValidas(tablero);
+
+    // Modo normal: 25% aleatorio
+    if (modo === 'normal' && Math.random() < 0.25) {
+      return validas[Math.floor(Math.random() * validas.length)];
+    }
+
+    // Primer movimiento en imposible → centro (apertura ganadora teórica)
+    const totalFichas = tablero.flat().filter(x => x !== 0).length;
+    if (modo === 'imposible' && totalFichas === 0) return 3;
+
+    // Comprobar victoria o bloqueo inmediato antes del minimax completo
+    for (const c of validas) {
+      const nt = tablero.map(f => [...f]); soltar(nt, c, IA);
+      if (hayGanador(nt, IA)) return c; // ganar ahora
+    }
+    for (const c of validas) {
+      const nt = tablero.map(f => [...f]); soltar(nt, c, HUMANO);
+      if (hayGanador(nt, HUMANO)) return c; // bloquear ahora
+    }
+
+    const profundidad = modo === 'imposible' ? 11 : 4;
+    const ordenadas   = ordenarMovimientos(tablero, validas);
+
+    let mejorPts = -Infinity, mejorCol = ordenadas[0];
+    for (const c of ordenadas) {
+      const nt = tablero.map(f => [...f]); soltar(nt, c, IA);
+      const pts = minimax(nt, profundidad - 1, -Infinity, Infinity, false);
+      if (pts > mejorPts) { mejorPts = pts; mejorCol = c; }
+    }
+    return mejorCol;
+  }
+
+  // ─────────────────────────────────────────────────────
+  // ARRANQUE
+  // ─────────────────────────────────────────────────────
+  elegirModo('normal');
+  </script>
+</body>
+</html>
