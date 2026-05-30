@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>4 en Raya — IA</title>
+  <!-- Firebase SDK (compat, sirve para usarse sin módulos ES) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
@@ -66,12 +69,106 @@
       background: rgba(255,255,255,0.03);
       user-select: none;
     }
-    #card-entrena { grid-column: 1 / -1; display: flex; align-items: center; gap: 14px; text-align: left; padding: 14px 18px; }
-    #card-entrena .mode-icon { font-size: 1.8rem; flex-shrink: 0; }
-    #card-entrena .mode-desc { margin-top: 2px; }
+    #card-entrena, #card-online { grid-column: 1 / -1; display: flex; align-items: center; gap: 14px; text-align: left; padding: 14px 18px; }
+    #card-entrena .mode-icon, #card-online .mode-icon { font-size: 1.8rem; flex-shrink: 0; }
+    #card-entrena .mode-desc, #card-online .mode-desc { margin-top: 2px; }
     .mode-card.sel-normal    { border-color: #6a3fff; background: rgba(106,63,255,0.15); }
     .mode-card.sel-imposible { border-color: #ef4444; background: rgba(239,68,68,0.12); }
     .mode-card.sel-entrena   { border-color: #4ade80; background: rgba(74,222,128,0.1); }
+    .mode-card.sel-online    { border-color: #60a5fa; background: rgba(96,165,250,0.12); }
+
+    /* ── BOTÓN AJUSTES ─────────────────────── */
+    #btn-ajustes {
+      position: absolute; top: 12px; right: 14px;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+      color: #b89dff; border-radius: 50%;
+      width: 38px; height: 38px; font-size: 1.05rem;
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #btn-ajustes:hover  { background: rgba(255,255,255,0.13); }
+    #btn-ajustes:active { transform: scale(0.92); }
+    #s-inicio { position: relative; }
+
+    /* ── INPUTS Y LOBBY ONLINE ─────────────── */
+    .input-field {
+      width: 100%; max-width: 300px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff; border-radius: 12px;
+      padding: 12px 14px; font-size: 1rem;
+      margin-top: 10px; outline: none;
+      transition: border-color 0.15s, background 0.15s;
+      font-family: inherit;
+    }
+    .input-field:focus { border-color: #60a5fa; background: rgba(96,165,250,0.08); }
+    .input-field.code  { text-align: center; letter-spacing: 4px; font-weight: 700; font-size: 1.4rem; text-transform: uppercase; }
+
+    .field-lbl {
+      font-size: 0.72rem; color: #8888bb; letter-spacing: 1px;
+      text-transform: uppercase; margin-top: 14px; align-self: flex-start;
+      padding-left: 4px;
+    }
+
+    .code-box {
+      background: rgba(96,165,250,0.1);
+      border: 2px dashed rgba(96,165,250,0.5);
+      border-radius: 16px; padding: 18px 24px;
+      margin: 16px 0; width: 100%; max-width: 300px;
+    }
+    .code-box .code-lbl {
+      font-size: 0.7rem; color: #8888bb; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+    .code-box .code-val {
+      font-size: 2.2rem; font-weight: 900; letter-spacing: 8px;
+      color: #60a5fa; cursor: pointer; user-select: all;
+      transition: transform 0.1s;
+    }
+    .code-box .code-val:active { transform: scale(0.96); }
+    .code-box .code-hint { font-size: 0.7rem; color: #666; margin-top: 6px; }
+
+    /* ── ESTADO TURNO RIVAL ────────────────── */
+    .status.opp-turn { color: #60a5fa; }
+    .pensando-dots::after {
+      content: '...'; display: inline-block;
+      animation: dots 1.2s steps(4, end) infinite;
+      width: 1.2em; text-align: left; overflow: hidden; vertical-align: bottom;
+    }
+    @keyframes dots {
+      0%   { content: '.'; }
+      33%  { content: '..'; }
+      66%  { content: '...'; }
+      100% { content: '.'; }
+    }
+
+    /* ── REVANCHA / BANNER ─────────────────── */
+    .rematch-banner {
+      background: rgba(96,165,250,0.12);
+      border: 1px solid rgba(96,165,250,0.4);
+      border-radius: 12px; padding: 10px 14px;
+      margin-top: 10px; font-size: 0.85rem; color: #93c5fd;
+      width: 100%; max-width: 340px;
+      display: none;
+    }
+    .rematch-banner.visible { display: block; }
+
+    /* ── MODAL AJUSTES ─────────────────────── */
+    .modal-bg {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 500; align-items: center; justify-content: center;
+      padding: 16px;
+    }
+    .modal-bg.visible { display: flex; animation: fadeIn 0.2s ease; }
+    .modal {
+      background: #1a1530; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 18px; padding: 22px; max-width: 360px; width: 100%;
+      text-align: center;
+    }
+    .modal h2 { font-size: 1.2rem; margin-bottom: 14px; }
+    .modal .btn { margin-top: 14px; }
     .mode-icon { font-size: 2rem; margin-bottom: 6px; }
     .mode-name { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
     .mode-desc { font-size: 0.72rem; color: #8888bb; }
@@ -270,9 +367,10 @@
 
   <!-- ░░ INICIO ░░ -->
   <div class="screen active" id="s-inicio">
+    <button id="btn-ajustes" onclick="abrirAjustes()" title="Ajustes">⚙️</button>
     <div style="font-size:3rem;margin-bottom:12px">🤖</div>
     <h1>4 en Raya</h1>
-    <p class="subtitulo">Juega contra una IA con algoritmo <strong>minimax</strong>.<br>Elige tu modo:</p>
+    <p class="subtitulo">Juega contra una IA con algoritmo <strong>minimax</strong><br>o reta a un amigo online.</p>
 
     <div class="mode-cards">
       <div class="mode-card sel-normal" id="card-normal" onclick="elegirModo('normal')">
@@ -292,9 +390,64 @@
           <div class="mode-desc">La IA te da una pista antes de cada jugada y analiza cómo juegas al terminar</div>
         </div>
       </div>
+      <div class="mode-card" id="card-online" onclick="elegirModo('online')">
+        <div class="mode-icon">🌐</div>
+        <div>
+          <div class="mode-name">Online — 2 jugadores</div>
+          <div class="mode-desc">Reta a un amigo por código de sala. Cada uno desde su dispositivo.</div>
+        </div>
+      </div>
     </div>
 
     <button class="btn" onclick="iniciarJuego()">¡Jugar!</button>
+  </div>
+
+  <!-- ░░ LOBBY ONLINE ░░ -->
+  <div class="screen" id="s-online-lobby">
+    <div style="font-size:2.6rem;margin-bottom:10px">🌐</div>
+    <h1>Jugar online</h1>
+    <p class="subtitulo">Crea una sala y comparte el código con tu amigo, o únete a una sala existente.</p>
+
+    <div class="field-lbl">Tu nick</div>
+    <input class="input-field" id="input-nick" maxlength="14" placeholder="Tu nombre" autocomplete="off">
+
+    <button class="btn" onclick="onCrearSala()">➕ Crear sala</button>
+
+    <div class="field-lbl">¿Te pasaron un código?</div>
+    <input class="input-field code" id="input-code" maxlength="6" placeholder="ABCD12" autocomplete="off">
+    <button class="btn outline" onclick="onUnirseSala()">🔑 Unirme a la sala</button>
+
+    <div id="lobby-error" style="color:#f87171;font-size:0.85rem;margin-top:10px;min-height:1.2em;"></div>
+
+    <button class="btn outline" onclick="volverInicioDesdeOnline()" style="margin-top:18px">← Volver</button>
+  </div>
+
+  <!-- ░░ ESPERA EN SALA ░░ -->
+  <div class="screen" id="s-online-wait">
+    <div style="font-size:2.6rem;margin-bottom:10px">⏳</div>
+    <h1>Esperando rival</h1>
+    <p class="subtitulo">Comparte este código con tu amigo para que entre a la sala:</p>
+
+    <div class="code-box" style="text-align:center">
+      <div class="code-lbl">Código de sala</div>
+      <div class="code-val" id="wait-code" onclick="copiarCodigo()">------</div>
+      <div class="code-hint">Toca para copiar</div>
+    </div>
+
+    <p class="subtitulo pensando-dots" id="wait-status">Esperando a que entre el rival</p>
+
+    <button class="btn outline" onclick="cancelarSala()" style="margin-top:18px">Cancelar</button>
+  </div>
+
+  <!-- ░░ MODAL AJUSTES ░░ -->
+  <div class="modal-bg" id="modal-ajustes">
+    <div class="modal">
+      <h2>⚙️ Ajustes</h2>
+      <div class="field-lbl" style="align-self:auto">Tu nick para partidas online</div>
+      <input class="input-field" id="ajustes-nick" maxlength="14" placeholder="Tu nombre" autocomplete="off">
+      <button class="btn" onclick="guardarAjustes()">Guardar</button>
+      <button class="btn outline" onclick="cerrarAjustes()">Cancelar</button>
+    </div>
   </div>
 
   <!-- ░░ JUEGO ░░ -->
@@ -302,7 +455,7 @@
     <div class="game-header">
       <div class="score-box">
         <div class="score-num human" id="pts-human">0</div>
-        <div class="score-lbl">TÚ</div>
+        <div class="score-lbl" id="lbl-human">TÚ</div>
       </div>
       <div class="score-box">
         <span class="mode-badge" id="modo-badge">Normal</span>
@@ -312,7 +465,7 @@
       </div>
       <div class="score-box">
         <div class="score-num ai" id="pts-ai">0</div>
-        <div class="score-lbl">IA</div>
+        <div class="score-lbl" id="lbl-ai">IA</div>
       </div>
     </div>
 
@@ -338,10 +491,13 @@
       <button class="train-btn" id="btn-pista"  onclick="togglePistas()">💡 Pistas: ON</button>
     </div>
 
-    <button class="btn" onclick="nuevaRonda()" style="margin-top:14px">Nueva partida</button>
-    <button class="btn outline" onclick="pantalla('s-inicio')">Cambiar modo</button>
+    <!-- Banner de revancha (solo online) -->
+    <div class="rematch-banner" id="rematch-banner"></div>
 
-    <div class="ia-nota">
+    <button class="btn" id="btn-nueva-partida" onclick="nuevaRonda()" style="margin-top:14px">Nueva partida</button>
+    <button class="btn outline" id="btn-cambiar-modo" onclick="salirJuego()">Cambiar modo</button>
+
+    <div class="ia-nota" id="ia-nota">
       🧠 Esta IA usa <strong>minimax con poda alfa-beta</strong> —
       el mismo principio que usa el ajedrez por ordenador.
       En modo imposible evalúa miles de jugadas por movimiento.
@@ -363,6 +519,16 @@
   let modoElegido = 'normal';
   let historial = [];     // snapshots para undo (modo entrenamiento)
   let pistasActivas = true; // toggle de pistas en modo entrenamiento
+
+  // ── ESTADO ONLINE ──
+  let esOnline       = false;
+  let miNum          = 0;    // 1 (creador, amarillo) o 2 (joiner, rojo)
+  let rivalNum       = 0;
+  let roomCode       = '';
+  let roomRef        = null;
+  let roomListener   = null;
+  let salaSnapshot   = null; // último estado recibido
+  let aplicandoRemoto = false; // para evitar bucles al renderizar desde firebase
 
   // ─────────────────────────────────────────────────────
   // PERSISTENCIA DEL MARCADOR
@@ -416,16 +582,30 @@
     document.getElementById('card-normal').className    = 'mode-card' + (m==='normal'    ? ' sel-normal'    : '');
     document.getElementById('card-imposible').className = 'mode-card' + (m==='imposible' ? ' sel-imposible' : '');
     document.getElementById('card-entrena').className   = 'mode-card' + (m==='entrena'   ? ' sel-entrena'   : '');
+    document.getElementById('card-online').className    = 'mode-card' + (m==='online'    ? ' sel-online'    : '');
   }
 
   function iniciarJuego() {
+    // Modo online: ir al lobby en vez de iniciar partida vs IA
+    if (modoElegido === 'online') {
+      abrirLobbyOnline();
+      return;
+    }
     modo = modoElegido;
+    esOnline = false;
     marcador = cargarMarcador(modo);
     actualizarMarcador();
     const badge = document.getElementById('modo-badge');
     if (modo === 'imposible') { badge.textContent = '💀 Imposible'; badge.className = 'mode-badge imposible'; }
     else if (modo === 'entrena') { badge.textContent = '🎓 Entrenamiento'; badge.className = 'mode-badge entrena'; }
     else { badge.textContent = '🙂 Normal'; badge.className = 'mode-badge'; }
+    // Restaurar etiquetas TÚ / IA
+    document.getElementById('lbl-human').textContent = 'TÚ';
+    document.getElementById('lbl-ai').textContent    = 'IA';
+    // Mostrar nota de IA, ocultar banner revancha
+    document.getElementById('ia-nota').style.display = '';
+    document.getElementById('rematch-banner').classList.remove('visible');
+    document.getElementById('btn-nueva-partida').textContent = 'Nueva partida';
     // Mostrar controles de entrenamiento solo en ese modo
     const trainBtns = document.getElementById('train-btns');
     trainBtns.classList.toggle('visible', modo === 'entrena');
@@ -435,10 +615,23 @@
     nuevaRonda();
   }
 
+  function salirJuego() {
+    // Si estamos en online, salir limpia la sala
+    if (esOnline) {
+      salirSalaOnline();
+    }
+    pantalla('s-inicio');
+  }
+
   // ─────────────────────────────────────────────────────
   // RONDA
   // ─────────────────────────────────────────────────────
   function nuevaRonda() {
+    // En online, "nueva partida" pide revancha en vez de resetear local
+    if (esOnline) {
+      pedirRevanchaOnline();
+      return;
+    }
     tablero     = Array(FILAS).fill(null).map(() => Array(COLS).fill(0));
     finJuego    = false;
     iaActiva    = false;
@@ -575,6 +768,12 @@
   function clickCol(col) {
     if (!turnoHumano || finJuego || iaActiva) return;
     if (tablero[0][col] !== 0) return;
+
+    // ── MODO ONLINE: enviar jugada a Firebase, no ejecutar local ──
+    if (esOnline) {
+      enviarJugadaOnline(col);
+      return;
+    }
 
     // Guardar snapshot ANTES de la jugada (para undo)
     if (modo === 'entrena') {
@@ -941,6 +1140,496 @@
     }
     return mejorCol;
   }
+
+  // ═════════════════════════════════════════════════════
+  // ███  MODO ONLINE (Firebase Realtime Database)  ██████
+  // ═════════════════════════════════════════════════════
+
+  // ── 1. Inicialización Firebase ──
+  const firebaseConfig = {
+    apiKey: "AIzaSyC8w5bcku6iK6gGCigjZ4RfA37Phr6Keuo",
+    authDomain: "juego-4-en-raya.firebaseapp.com",
+    databaseURL: "https://juego-4-en-raya-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "juego-4-en-raya",
+    storageBucket: "juego-4-en-raya.firebasestorage.app",
+    messagingSenderId: "370447733969",
+    appId: "1:370447733969:web:9c986257036f457a8721f0",
+    measurementId: "G-SCDK2W5VMV"
+  };
+
+  let fbApp, fbDB;
+  try {
+    fbApp = firebase.initializeApp(firebaseConfig);
+    fbDB  = firebase.database();
+  } catch (e) {
+    console.error('Firebase no se pudo inicializar:', e);
+  }
+
+  // ── 2. Nick persistente ──
+  const NICK_KEY = '4enraya_nick';
+  function getNick() {
+    try { return localStorage.getItem(NICK_KEY) || ''; } catch(e) { return ''; }
+  }
+  function setNick(n) {
+    try { localStorage.setItem(NICK_KEY, n); } catch(e) {}
+  }
+  function nickPorDefecto() {
+    return 'Jugador' + Math.floor(100 + Math.random() * 900);
+  }
+
+  // ── 3. Modal de ajustes ──
+  function abrirAjustes() {
+    document.getElementById('ajustes-nick').value = getNick();
+    document.getElementById('modal-ajustes').classList.add('visible');
+    setTimeout(() => document.getElementById('ajustes-nick').focus(), 50);
+  }
+  function cerrarAjustes() {
+    document.getElementById('modal-ajustes').classList.remove('visible');
+  }
+  function guardarAjustes() {
+    const v = document.getElementById('ajustes-nick').value.trim().slice(0, 14);
+    if (v) setNick(v);
+    cerrarAjustes();
+  }
+
+  // ── 4. Generador de código de sala ──
+  function generarCodigo() {
+    // Sin caracteres ambiguos (0/O, 1/I/L)
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    let s = '';
+    for (let i = 0; i < 5; i++) s += chars[Math.floor(Math.random() * chars.length)];
+    return s;
+  }
+
+  // ── 5. Lobby ──
+  function abrirLobbyOnline() {
+    if (!fbDB) {
+      alert('No se pudo conectar con Firebase. Recarga la página.');
+      return;
+    }
+    // Prellenar nick (o generar uno si no hay)
+    let nick = getNick();
+    if (!nick) { nick = nickPorDefecto(); setNick(nick); }
+    document.getElementById('input-nick').value = nick;
+    document.getElementById('input-code').value = '';
+    document.getElementById('lobby-error').textContent = '';
+    pantalla('s-online-lobby');
+  }
+
+  function volverInicioDesdeOnline() {
+    pantalla('s-inicio');
+  }
+
+  function mostrarErrorLobby(msg) {
+    document.getElementById('lobby-error').textContent = msg;
+  }
+
+  function leerNickDelLobby() {
+    let nick = document.getElementById('input-nick').value.trim().slice(0, 14);
+    if (!nick) nick = nickPorDefecto();
+    setNick(nick);
+    return nick;
+  }
+
+  // ── 6. Crear sala ──
+  async function onCrearSala() {
+    const nick = leerNickDelLobby();
+    if (!fbDB) { mostrarErrorLobby('Sin conexión.'); return; }
+
+    let code, intentos = 0;
+    // Asegurar código libre
+    while (true) {
+      code = generarCodigo();
+      try {
+        const snap = await fbDB.ref('rooms/' + code).get();
+        if (!snap.exists()) break;
+      } catch (e) {
+        mostrarErrorLobby('Error de red: ' + e.message);
+        return;
+      }
+      if (++intentos > 10) { mostrarErrorLobby('No se pudo generar código. Reintenta.'); return; }
+    }
+
+    const initState = {
+      board: ''.padEnd(42, '0'),    // 6x7 = 42 celdas, '0' vacío, '1' o '2' jugador
+      turn: 1,                       // empieza el creador
+      status: 'waiting',             // waiting | playing | finished
+      winner: 0,                     // 0=ninguno, 1, 2, o 3=empate
+      winningCells: '',              // "f-c,f-c,f-c,f-c" si hay ganador
+      players: {
+        1: { nick, joined: firebase.database.ServerValue.TIMESTAMP },
+      },
+      rematch: { 1: false, 2: false },
+      round: 1,
+      createdAt: firebase.database.ServerValue.TIMESTAMP,
+    };
+
+    try {
+      await fbDB.ref('rooms/' + code).set(initState);
+    } catch (e) {
+      mostrarErrorLobby('No se pudo crear sala: ' + e.message);
+      return;
+    }
+
+    roomCode = code;
+    miNum    = 1;
+    rivalNum = 2;
+    entrarEnSala();
+
+    // Pantalla de espera
+    document.getElementById('wait-code').textContent = code;
+    document.getElementById('wait-status').textContent = 'Esperando a que entre el rival';
+    document.getElementById('wait-status').classList.add('pensando-dots');
+    pantalla('s-online-wait');
+  }
+
+  // ── 7. Unirse a sala ──
+  async function onUnirseSala() {
+    const nick = leerNickDelLobby();
+    const code = document.getElementById('input-code').value.trim().toUpperCase();
+    if (!code || code.length < 4) { mostrarErrorLobby('Introduce un código válido.'); return; }
+    if (!fbDB) { mostrarErrorLobby('Sin conexión.'); return; }
+
+    let snap;
+    try {
+      snap = await fbDB.ref('rooms/' + code).get();
+    } catch (e) {
+      mostrarErrorLobby('Error de red: ' + e.message);
+      return;
+    }
+    if (!snap.exists()) { mostrarErrorLobby('No existe ninguna sala con ese código.'); return; }
+    const data = snap.val();
+    if (data.players && data.players[2]) {
+      mostrarErrorLobby('Esa sala ya está llena.'); return;
+    }
+
+    try {
+      await fbDB.ref('rooms/' + code).update({
+        'players/2': { nick, joined: firebase.database.ServerValue.TIMESTAMP },
+        'status': 'playing',
+      });
+    } catch (e) {
+      mostrarErrorLobby('No se pudo unir: ' + e.message);
+      return;
+    }
+
+    roomCode = code;
+    miNum    = 2;
+    rivalNum = 1;
+    entrarEnSala();
+    // Arrancar juego directamente (el creador también arrancará al recibir el cambio)
+    arrancarPartidaOnline();
+  }
+
+  // ── 8. Listener de la sala ──
+  function entrarEnSala() {
+    if (!roomCode) return;
+    roomRef = fbDB.ref('rooms/' + roomCode);
+
+    // Limpiar la sala si yo cierro el navegador (solo creador, para no dejar basura)
+    if (miNum === 1) {
+      roomRef.onDisconnect().remove();
+    }
+
+    if (roomListener) roomRef.off('value', roomListener);
+    roomListener = roomRef.on('value', (snap) => {
+      const data = snap.val();
+      if (!data) {
+        // La sala se eliminó (el otro se fue)
+        if (esOnline) {
+          alert('La sala fue cerrada (el rival se desconectó).');
+          finalizarSalaLocal();
+          pantalla('s-inicio');
+        }
+        return;
+      }
+      salaSnapshot = data;
+
+      // Si estoy esperando y entró el rival → arrancar
+      if (!esOnline && data.status === 'playing' && data.players && data.players[2]) {
+        arrancarPartidaOnline();
+      }
+
+      // Si ya estoy jugando, renderizar el estado recibido
+      if (esOnline) {
+        renderizarEstadoOnline(data);
+      }
+    });
+  }
+
+  function copiarCodigo() {
+    if (!roomCode) return;
+    try {
+      navigator.clipboard.writeText(roomCode);
+      const el = document.getElementById('wait-code');
+      const original = el.textContent;
+      el.textContent = '¡COPIADO!';
+      setTimeout(() => el.textContent = original, 900);
+    } catch(e) {}
+  }
+
+  function cancelarSala() {
+    salirSalaOnline();
+    pantalla('s-inicio');
+  }
+
+  // ── 9. Arrancar la pantalla de juego en modo online ──
+  function arrancarPartidaOnline() {
+    esOnline = true;
+    modo = 'online';
+
+    // Marcador local (no persistente en online)
+    marcador = { humano: 0, ia: 0, empate: 0 };
+    actualizarMarcador();
+
+    // Badge
+    const badge = document.getElementById('modo-badge');
+    badge.textContent = '🌐 Online · ' + roomCode;
+    badge.className = 'mode-badge';
+    badge.style.color = '#60a5fa';
+
+    // Etiquetas: TÚ vs nick rival
+    document.getElementById('lbl-human').textContent = 'TÚ';
+    const rivalNick = (salaSnapshot && salaSnapshot.players && salaSnapshot.players[rivalNum])
+      ? salaSnapshot.players[rivalNum].nick : 'RIVAL';
+    document.getElementById('lbl-ai').textContent = rivalNick.toUpperCase().slice(0, 10);
+
+    // Ocultar elementos no aplicables
+    document.getElementById('ia-nota').style.display = 'none';
+    document.getElementById('train-btns').classList.remove('visible');
+    document.getElementById('btn-nueva-partida').textContent = '🔄 Pedir revancha';
+    document.getElementById('rematch-banner').classList.remove('visible');
+
+    // Estado local: tablero vacío, esperar render desde Firebase
+    tablero  = Array(FILAS).fill(null).map(() => Array(COLS).fill(0));
+    finJuego = false; iaActiva = false; turnoHumano = (miNum === 1);
+    construirTablero();
+    pantalla('s-juego');
+
+    // Aplicar primer estado si ya lo tenemos
+    if (salaSnapshot) renderizarEstadoOnline(salaSnapshot);
+  }
+
+  // ── 10. Render desde estado de Firebase ──
+  function renderizarEstadoOnline(data) {
+    if (!data || !data.board) return;
+    aplicandoRemoto = true;
+
+    // 1. Reconstruir tablero
+    const nuevoTab = Array(FILAS).fill(null).map(() => Array(COLS).fill(0));
+    for (let f = 0; f < FILAS; f++) {
+      for (let c = 0; c < COLS; c++) {
+        const v = parseInt(data.board[f * COLS + c], 10) || 0;
+        nuevoTab[f][c] = v;
+      }
+    }
+
+    // Detectar última jugada (para animar)
+    let ultima = null;
+    if (tablero) {
+      for (let f = 0; f < FILAS; f++)
+        for (let c = 0; c < COLS; c++)
+          if (nuevoTab[f][c] !== 0 && tablero[f][c] === 0) ultima = { f, c, v: nuevoTab[f][c] };
+    }
+    tablero = nuevoTab;
+
+    // 2. Repintar todas las celdas
+    for (let f = 0; f < FILAS; f++) {
+      for (let c = 0; c < COLS; c++) {
+        const el = document.getElementById(`c${f}-${c}`);
+        if (!el) continue;
+        const v = tablero[f][c];
+        const animar = ultima && ultima.f === f && ultima.c === c;
+        const cls = v === 1 ? ' human' : v === 2 ? ' ai' : '';
+        el.className = 'cell' + cls + (animar ? ' nueva' : '');
+        if (animar) setTimeout(() => el.classList.remove('nueva'), 250);
+      }
+    }
+
+    // 3. Actualizar marcador desde data (winsP1, winsP2, draws) si existen
+    if (typeof data.winsP1 === 'number' || typeof data.winsP2 === 'number' || typeof data.draws === 'number') {
+      const winsMios   = miNum === 1 ? (data.winsP1 || 0) : (data.winsP2 || 0);
+      const winsRival  = miNum === 1 ? (data.winsP2 || 0) : (data.winsP1 || 0);
+      marcador.humano = winsMios;
+      marcador.ia     = winsRival;
+      marcador.empate = data.draws || 0;
+      actualizarMarcador();
+    }
+
+    // 4. Estado de la partida
+    if (data.status === 'finished') {
+      finJuego = true;
+      habilitarCols(false);
+      const w = data.winner;
+      if (w === 3) {
+        setStatus('🤝 Empate.', '');
+      } else if (w === miNum) {
+        setStatus('🎉 ¡Ganaste!', 'human-win');
+        if (data.winningCells) resaltarCeldasDesdeStr(data.winningCells);
+        lanzarConfetti();
+      } else if (w === rivalNum) {
+        setStatus('😢 Ganó tu rival.', 'ai-win');
+        if (data.winningCells) resaltarCeldasDesdeStr(data.winningCells);
+      }
+      mostrarBannerRevancha(data.rematch);
+    } else if (data.status === 'playing') {
+      finJuego = false;
+      const esMiTurno = (data.turn === miNum);
+      turnoHumano = esMiTurno;
+      habilitarCols(esMiTurno);
+      if (esMiTurno) {
+        setStatus('🟡 Tu turno', '');
+      } else {
+        const rivalNick = (data.players && data.players[rivalNum]) ? data.players[rivalNum].nick : 'Rival';
+        const el = document.getElementById('status');
+        el.innerHTML = `🤔 ${rivalNick} está pensando<span class="pensando-dots-inline"></span>`;
+        el.className = 'status opp-turn pensando-dots';
+      }
+    }
+
+    aplicandoRemoto = false;
+  }
+
+  function resaltarCeldasDesdeStr(str) {
+    str.split(',').forEach(par => {
+      const [f, c] = par.split('-').map(n => parseInt(n, 10));
+      const el = document.getElementById(`c${f}-${c}`);
+      if (el) el.classList.add('ganadora');
+    });
+  }
+
+  // ── 11. Enviar jugada ──
+  async function enviarJugadaOnline(col) {
+    if (!roomRef || !salaSnapshot) return;
+    if (salaSnapshot.status !== 'playing') return;
+    if (salaSnapshot.turn !== miNum) return;
+
+    // Recalcular sobre el tablero actual (autoritativo)
+    const board = salaSnapshot.board;
+    // Encontrar fila libre en la columna
+    let fila = -1;
+    for (let f = FILAS - 1; f >= 0; f--) {
+      if (board[f * COLS + col] === '0') { fila = f; break; }
+    }
+    if (fila < 0) return; // columna llena
+
+    // Construir nuevo board string
+    const idx = fila * COLS + col;
+    const newBoard = board.substring(0, idx) + String(miNum) + board.substring(idx + 1);
+
+    // Reconstruir matriz para detectar victoria/empate
+    const t = Array(FILAS).fill(null).map(() => Array(COLS).fill(0));
+    for (let f = 0; f < FILAS; f++)
+      for (let c = 0; c < COLS; c++)
+        t[f][c] = parseInt(newBoard[f * COLS + c], 10);
+
+    const ganadoras = buscarGanadora(t, miNum);
+    const lleno = t[0].every(c => c !== 0);
+
+    const update = {
+      board: newBoard,
+      turn: rivalNum,
+    };
+    if (ganadoras) {
+      update.status = 'finished';
+      update.winner = miNum;
+      update.winningCells = ganadoras.map(([f, c]) => `${f}-${c}`).join(',');
+      // Incrementar marcador del ganador
+      update[miNum === 1 ? 'winsP1' : 'winsP2'] = (salaSnapshot[miNum === 1 ? 'winsP1' : 'winsP2'] || 0) + 1;
+    } else if (lleno) {
+      update.status = 'finished';
+      update.winner = 3;
+      update.draws  = (salaSnapshot.draws || 0) + 1;
+    }
+
+    try {
+      await roomRef.update(update);
+    } catch (e) {
+      alert('Error enviando jugada: ' + e.message);
+    }
+  }
+
+  // ── 12. Revancha ──
+  async function pedirRevanchaOnline() {
+    if (!roomRef || !salaSnapshot) return;
+    if (salaSnapshot.status !== 'finished') return;
+
+    const rematch = salaSnapshot.rematch || { 1: false, 2: false };
+    rematch[miNum] = true;
+
+    // Si ambos quieren revancha → resetear partida
+    if (rematch[1] && rematch[2]) {
+      // El jugador 2 inicia la nueva ronda (alterna)
+      const prevRound = salaSnapshot.round || 1;
+      const nuevoTurno = (prevRound % 2 === 0) ? 1 : 2;
+      try {
+        await roomRef.update({
+          board: ''.padEnd(42, '0'),
+          turn: nuevoTurno,
+          status: 'playing',
+          winner: 0,
+          winningCells: '',
+          rematch: { 1: false, 2: false },
+          round: prevRound + 1,
+        });
+      } catch(e) { alert('Error reiniciando: ' + e.message); }
+    } else {
+      try {
+        await roomRef.update({ ['rematch/' + miNum]: true });
+      } catch(e) {}
+    }
+  }
+
+  function mostrarBannerRevancha(rematch) {
+    const banner = document.getElementById('rematch-banner');
+    rematch = rematch || { 1: false, 2: false };
+    const yo    = !!rematch[miNum];
+    const rival = !!rematch[rivalNum];
+
+    if (yo && !rival) {
+      banner.innerHTML = '⏳ Esperando a que el rival acepte la revancha...';
+      banner.classList.add('visible');
+    } else if (!yo && rival) {
+      banner.innerHTML = '🔄 El rival quiere la revancha. Pulsa "Pedir revancha" para empezar.';
+      banner.classList.add('visible');
+    } else {
+      banner.classList.remove('visible');
+    }
+  }
+
+  // ── 13. Salir / limpiar ──
+  async function salirSalaOnline() {
+    if (roomRef) {
+      try { roomRef.onDisconnect().cancel(); } catch(e) {}
+      try {
+        if (miNum === 1) {
+          // creador borra la sala
+          await roomRef.remove();
+        } else {
+          // joiner se quita
+          await roomRef.child('players/2').remove();
+          await roomRef.update({ status: 'waiting' });
+        }
+      } catch(e) {}
+      if (roomListener) { roomRef.off('value', roomListener); roomListener = null; }
+    }
+    finalizarSalaLocal();
+  }
+
+  function finalizarSalaLocal() {
+    esOnline = false;
+    roomRef = null;
+    roomCode = '';
+    miNum = 0; rivalNum = 0;
+    salaSnapshot = null;
+  }
+
+  // Cerrar sala si el usuario cierra la pestaña
+  window.addEventListener('beforeunload', () => {
+    if (roomRef && miNum === 1) {
+      try { roomRef.remove(); } catch(e) {}
+    }
+  });
 
   // ─────────────────────────────────────────────────────
   // ARRANQUE
